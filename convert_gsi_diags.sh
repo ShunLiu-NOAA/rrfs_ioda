@@ -1,14 +1,13 @@
 #!/bin/bash
 #SBATCH -J convert_diags_jedi 
 #SBATCH -A fv3-cam
-#SBATCH -q debug 
+#SBATCH -q batch
 #SBATCH --nodes=1
-#SBATCH -t 0:10:00
-#SBATCH -o SLURM_rw.o%j
-#SBATCH -e SLURM_rw.e%j
+#SBATCH -t 0:08:00
+#SBATCH -o /scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/tmpnwprd/log/rrfs_ioda.out_%j
+#SBATCH -e /scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/tmpnwprd/log/rrfs_ioda.err_%j
 #SBATCH --mail-user=$LOGNAME@noaa.gov
-OutDir=$1
-DATE=2018041500
+#DATE=2018041500
 
 # load modules here used to compile GSI
 module purge
@@ -21,7 +20,35 @@ module use -a /home/Stylianos.Flampouris/modulefiles
 module load anaconda/2019.08.07
 module load nccmp # for ctests
 
-IODACDir=/scratch2/NCEPDEV/fv3-cam/save/Shun.Liu/gsi/GSI_forJEDI/ush/JEDI/ioda-converters/build/bin
+
+  echo $thisdate
+  cyc=$2
+  tmmark=$1
+  IODACDir=/scratch2/NCEPDEV/fv3-cam/save/Shun.Liu/gsi/GSI_forJEDI/ush/JEDI/ioda-converters/build/bin
+  IODAdir=/scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/IODA/$thisdate
+  DIAGdir=/scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/DIAG/diag.${thisdate}/${cyc}.${tmmark}
+  rundir=/scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/tmpnwprd/${thisdate}_${cyc}_${tmmark}
+  OutDir=$rundir
+  GSIDIAG=$rundir/GSI_diags
+  mkdir -p $IODAdir
+  rm -fr $GSIDIAG
+  mkdir -p $GSIDIAG
+  cp $DIAGdir/diag_conv*ges* $GSIDIAG
+
+  cd $GSIDIAG
+  gunzip *.gz
+
+  fl=`ls -1 diag*`
+  for ifl in $fl
+  do
+  leftpart=`basename $ifl .nc4`
+  flnm=${leftpart}_ensmean.nc4
+  echo $flnm
+  mv $ifl $flnm
+  done
+
+  cd $rrfs_ioda_dir
+  OutDir=$rundir
 
 cd $IODACDir
 
@@ -37,6 +64,8 @@ python ./proc_gsi_ncdiag.py -n 24 -o $OutDir/obs -g $OutDir/geoval $OutDir/GSI_d
 # subset obs
 python ./subset_files.py -n 24 -m $OutDir/obs -g $OutDir/geoval
 python ./subset_files.py -n 24 -s $OutDir/obs -g $OutDir/geoval
+
+mv $rundir $IODAdir
 exit
 
 # combine conventional obs
