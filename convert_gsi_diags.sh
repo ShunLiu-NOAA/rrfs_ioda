@@ -26,7 +26,7 @@ module load nccmp # for ctests
   tmmark=$1
   IODACDir=/scratch2/NCEPDEV/fv3-cam/save/Shun.Liu/gsi/GSI_forJEDI/ush/JEDI/ioda-converters/build/bin
   IODAdir=/scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/IODA/$thisdate
-  DIAGdir=/scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/DIAG/diag.${thisdate}/${cyc}.${tmmark}
+  DIAGdir=/scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/DIAG/diag.${thisdate}_${cyc}/${cyc}.${tmmark}
   rundir=/scratch2/NCEPDEV/stmp3/Shun.Liu/RRFS_IODA/tmpnwprd/${thisdate}_${cyc}_${tmmark}
   OutDir=$rundir
   GSIDIAG=$rundir/GSI_diags
